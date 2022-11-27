@@ -1,0 +1,86 @@
+﻿@page "/doctor"
+@page "/doctor/{id:int}"
+@inject IDoctorService DoctorService
+
+@if (Id == null)
+{
+    <PageTitle>Create a new Doctor</PageTitle>
+    <h3>Create a new Doctor</h3>
+}
+else
+{
+    <PageTitle>Edit @doctor.Specialization</PageTitle>
+    <h3>Edit @doctor.Specialization</h3>
+}
+
+<EditForm Model="doctor" OnSubmit="HandleSubmit">
+    <div>
+        <label for="firstname">First Name</label>
+        <InputText id="firstname" @bind-Value="doctor.FirstName" class="form-control"></InputText>
+    </div>
+    <div>
+        <label for="lastname">Last Name</label>
+        <InputText id="lastname" @bind-Value="doctor.LastName" class="form-control"></InputText>
+    </div>
+    <div>
+        <label for="specialization">Specialization</label>
+        <InputText id="specialization" @bind-Value="doctor.Specialization" class="form-control"></InputText>
+    </div>
+    <div>
+        <label>Ward</label><br />
+        <InputSelect @bind-Value="doctor.WardId" class="form-select">
+            @foreach (var ward in DoctorService.Wards)
+            {
+                <option value="@ward.Id">@ward.Name</option>
+            }
+        </InputSelect>
+    </div>
+    <br />
+    <button type="submit" class="btn btn-primary">@btnText</button>
+    <button type="button" class="btn btn-danger" @onclick="DeleteDoctor">Delete Doctor</button>
+</EditForm>
+
+@code {
+    [Parameter]
+    public int? Id { get; set; }
+
+    string btnText = string.Empty;
+
+    Doctor doctor = new Doctor { Ward = new Ward() };
+
+    protected override async Task OnInitializedAsync()
+    {
+        btnText = Id == null ? "Save New Doctor" : "Update Doctor";
+        await DoctorService.GetWards();
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (Id == null)
+        {
+            doctor.Ward = DoctorService.Wards[0];
+            doctor.WardId = doctor.Ward.Id;
+        }
+        else
+        {
+            doctor = await DoctorService.GetSingleDoctor((int)Id);
+        }
+    }
+
+    async Task HandleSubmit()
+    {
+        if (Id == null)
+        {
+            await DoctorService.CreateDoctor(doctor);
+        }
+        else
+        {
+            await DoctorService.UpdateDoctor(doctor);
+        }
+    }
+
+    async Task DeleteDoctor()
+    {
+        await DoctorService.DeleteDoctor(doctor.Id);
+    }
+}

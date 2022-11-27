@@ -1,0 +1,51 @@
+﻿@page "/doctors"
+@inject IDoctorService DoctorService
+@inject NavigationManager NavigationManager
+
+<PageTitle>Doctors</PageTitle>
+
+<h3>Doctors</h3>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>First Name</th>
+            <th>Last Name</th>
+            <th>Specialization</th>
+            <th>Ward</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var doctor in DoctorService.Doctors)
+        {
+            <tr>
+                <td>@doctor.FirstName</td>
+                <td>@doctor.LastName</td>
+                <td>@doctor.Specialization</td>
+                <td>@doctor.Ward.Name</td>
+                <td>
+                    <button class="btn btn-primary" @onclick="(() => ShowDoctor(doctor.Id))"><i class="oi oi-pencil"></i></button>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+<button class="btn btn-primary" @onclick="CreateNewDoctor">Create New Doctor</button>
+
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        await DoctorService.GetDoctors();
+    }
+
+    void ShowDoctor(int id)
+    {
+        NavigationManager.NavigateTo($"doctor/{id}");
+    }
+
+    void CreateNewDoctor()
+    {
+        NavigationManager.NavigateTo("/doctor");
+    }
+}
